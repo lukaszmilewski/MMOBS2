@@ -1,0 +1,57 @@
+20.03.2020
+1. Fajnie, że zacząłeś :).
+
+01.04.2020
+1. Z tego co widzę, to nigdzie nie aktualizujesz sił.
+2. Po drugie siła jest wektorem, a obliczasz skalar. GmM/r^2 * wersor(r).
+   wersor(r)=wektor(r)/|r| (wersor to wektor o długości 1). Tak więc Twój
+   potrzebujesz GmM/r^3 * wektor(r). Wektor(r) u Ciebie to będzie 
+   atom2.x minus self.x (albo przeciwnie).
+3. Łatwiej Ci będzie debuggować jak też sobie zrobisz funkcję do
+   rysowania trajektorii. Albo też energii. Podpowiedź jest w postaci
+   programu rysującego random walk na naszym gicie.
+
+20.05.2020
+1. W algorytmie eulera, w obliczaniu prędkości nie powinno być 1/2 przy
+   członie z siłą.
+2. Co do energii, to chciałbym żebyś przedstawił energię kinetyczną,
+   potencjalną i całkowitą. Przypominam, że energia jest jednostką
+   skalarną, nie wektorową.
+3. Po wniesieniu tych poprawek trajektoria powinna być poprawna
+   (tzn ukazująca wady algorytmu Eulera) co też powinno być widoczne
+   w wykresach energii.
+4. Po wniesieniu tych poprawek pierwsze okrążenie powinno w miarę 
+   trafiać w punkty [1,0], [0,-1], a u Ciebie tak nie jest, ale to może
+   jest najmniejszy problem. Może samo się wyjaśni jak zaimplementujesz
+   Verleta i leapfroga.
+
+23.05.2020
+1. Przypominam się o punktach 2., 3. i 4. z 20.05.2020. Dziwnie się 
+   rysuje ta energia ;).
+2. Przez przypadek zrobiła się proca grawitacyjna. Daj prędkość [2,0],
+   to zobaczysz co się niedobrego dzieje w Eulerze. Tylko że dla [1,0]
+   powinna wyjść w miarę kołowa orbita. 
+
+26.05.2020
+1. Super! Widać to co jest ważne. 
+   Leapfrog i Verlet nie zachowują energii, ale widać, że oscylują wokół
+   pewnej stałej wartości i to często wystarcza w dynamice molekularnej.
+   Istnieją algorytmy wyższych rzędów (takie które uwzględniają dalsze
+   człony z dt w wyższych potęgach), ale to Verlet i Leapfrog są
+   najczęściej wykorzystywane. I powodem jest właśnie ta stabilność 
+   i odwracalność w czasie.
+   Euler nie jest odwracalny w czasie i się „grzeje". Widać, że z czasem
+   energia układu rośnie. Tak więc Verlet i LF, które wymagają
+   podobnej liczby operacji, są dużo lepsze. To decyduje o skuteczności
+   Verleta i LF.
+   Mówi się też, że Verlet i LF są symplektyczne i zachowują objętość
+   przestrzeni fazowej. To właśnie znaczy, że mimo, że nie muszą
+   zachowywać energii i nie muszą być dokładniejsze od innych
+   algorytmów, to jednak w długich symulacjach się nie rozjeżdżają.
+2. Prawie dobrze, zastanawia mnie dlaczego w Twoich symulacjach 
+   planeta nie chce sięgnąć punktu [0,-1]. Przynajmniej widać, że nie
+   jest to efekt któregoś z algorytmów całkujących, bo to się dzieje 
+   dla każdego z nich. Siła wygląda na dobrze obliczaną, może coś robisz
+   w złej kolejności, albo jakaś wartość jest nie taka? Fajnie jeśli
+   znajdziesz błąd, ale myślę że...
+3. ...lepiej się wziąć za kolejne ćwiczenie :) (i zachęcam).
