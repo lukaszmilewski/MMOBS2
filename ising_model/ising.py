@@ -62,18 +62,23 @@ def ising(s, beta):
 
 
 def plots(M, chi, m_error, chi_error):
+    plt.rcParams.update({'font.size': 16})  # Increase font size for better readability
     fig, axs = plt.subplots(2, 1, figsize=(10, 10))
 
-    axs[0].set_title('Plot of absolute magnetization against inverse temperature')
-    axs[0].set_xlabel('beta')
+    axs[0].set_title('Absolute Magnetization vs Inverse Temperature')
+    axs[0].set_xlabel('Beta')
     axs[0].set_ylabel('Magnetization M')
-    axs[0].errorbar(betas, M, m_error)
-    axs[1].set_title('Plot of magnetic susceptibility against inverse temperature')
-    axs[1].set_xlabel('beta')
-    axs[1].set_ylabel('Magnetic susceptibility chi')
-    axs[1].errorbar(betas, chi, chi_error)
+    axs[0].errorbar(betas, M, m_error, fmt='o-', linewidth=2, capsize=5, markersize=8)
+    axs[0].grid(True)
 
-    fig.savefig('3_Ising_lm_plots')
+    axs[1].set_title('Magnetic Susceptibility vs Inverse Temperature')
+    axs[1].set_xlabel('Beta')
+    axs[1].set_ylabel('Magnetic Susceptibility chi')
+    axs[1].errorbar(betas, chi, chi_error, fmt='o-', linewidth=2, capsize=5, markersize=8)
+    axs[1].grid(True)
+
+    fig.tight_layout()
+    fig.savefig('results_plots.png', dpi=300)  # Save high-resolution plot
     plt.show()
     plt.close()
 
@@ -103,3 +108,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
