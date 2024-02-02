@@ -26,7 +26,7 @@ The Molecular Dynamics of Random Walk project simulates the behavior of particle
 - Trajectory plotting and animation.
 - Exporting simulation frames to create an animation.
 
-![anim](animacja.gif)
+![anim](https://github.com/lukaszmilewski/MMOBS2/blob/main/random_walk/animacja.gif)
 
 
 
