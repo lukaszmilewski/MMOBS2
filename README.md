@@ -18,6 +18,14 @@ The Planet-Sun system simulation project focuses on simulating the motion of a p
 
 The Molecular Dynamics of Random Walk project simulates the behavior of particles in a box with periodic boundary conditions and a thermostat. The particles undergo random walks within the box, and the thermostat ensures temperature control. This project provides insights into the diffusion behavior of particles in confined environments.
 
+- Molecular dynamics simulation using the leapfrog integration scheme.
+- Periodic boundary conditions to simulate an infinite system.
+- Calculation of interatomic forces using Lennard-Jones potential.
+- Energy calculations including kinetic energy, potential energy, and total energy.
+- Trajectory plotting and animation.
+- Exporting simulation frames to create an animation.
+
+
 Each project is implemented in Python, following an object-oriented programming paradigm, making it easy to understand, modify, and extend.
 
 ## Requirements
