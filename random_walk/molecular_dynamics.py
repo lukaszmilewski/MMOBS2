@@ -7,15 +7,15 @@ from tqdm import trange
 import subprocess as sub
 import sys
 
-tlist_do_wykresu_f = []
+tlist_to_plot_f = []
 
 
-class atom(object):  # Klasa określająca wszystkie elementy/atomy w układzie: w tym przypadku jest to i planeta i słońce
+class atom(object):  # Class defining all elements/atoms in the system: in this case it's both a planet and a sun
     def __init__(self, v0, m, X, name=None):  # trajectory = np.empty(0, dtype=float)):
         self.name = name
-        # położenie
+        # position
         self.X = X #np.array([0.5,0.5])
-        # do losowania polozenia bez powtorzen
+        # for randomizing position without repetitions
 
         self.Xx = 0
         self.Xy = 0
@@ -47,17 +47,17 @@ class atom(object):  # Klasa określająca wszystkie elementy/atomy w układzie:
 
 
 def initiate_frame_print():
-    # tworzy folder na klatki symulacyjne
+    # creates a folder for simulation frames
     try:
         os.mkdir('frames')
     except:
         pass
 
 
-class simulation(object):  # Klasa symulujaca cala symulacje
+class simulation(object):  # Class simulating the entire simulation
     def __init__(self, dt=0.0001, num_of_atoms=16, no_of_steps=4000,
                  steps_per_frame=100, export_frames=True, export_subplots=True,
-                 boxsize=8.0, T0=2.5, czytermostat=False, temp_term=5, export_debug_plots=True):
+                 boxsize=8.0, T0=2.5, thermostat=False, temp_term=5, export_debug_plots=True):
 
         #self.atoms = np.array([atom(np.random.uniform(low=-1, high=1, size=2), 1, np.array([2,1])),
         #                       atom(np.random.uniform(low=-1, high=1, size=2), 1, np.array([3, 1])),
@@ -72,7 +72,7 @@ class simulation(object):  # Klasa symulujaca cala symulacje
 
 
         self.T0 = T0
-        self.czytermostat = czytermostat
+        self.thermostat = thermostat
         self.debugplots = export_debug_plots
         self.temp_term = temp_term
         self.num_of_atoms = num_of_atoms
@@ -82,21 +82,21 @@ class simulation(object):  # Klasa symulujaca cala symulacje
         self.no_of_steps = no_of_steps
         self.eta = None
         # self.temp = temp
-        # periodyczne warunki brzegowe
+        # periodic boundary conditions
 
         self.debug_forces_list = []
         self.ep = 0
 
         self.list_used_Xx = []
         self.list_used_Xy = []
-        # macierz polozen
+        # position matrix
         self.pos_matrix = []
 
-        # macierz wektorów odległosci r
+        # distance vectors matrix r
         self.r_vectors_matrix = np.zeros(shape=(self.num_of_atoms,
                                                 self.num_of_atoms), dtype=np.object)
 
-        # macierz r_len
+        # r_len matrix
         self.r_len_matrix = np.zeros(shape=(self.num_of_atoms,
                                             self.num_of_atoms), dtype=np.float)
 
@@ -116,7 +116,7 @@ class simulation(object):  # Klasa symulujaca cala symulacje
         self.eksum = 0
         self.epsum = 0
         self.listF = []
-        # ----- do animacji -----
+        # ----- for animation -----
         self.step = 0
         self.steps_per_frame = steps_per_frame
         # export parameters
@@ -138,20 +138,20 @@ class simulation(object):  # Klasa symulujaca cala symulacje
 
     def sys_commands(self):
         try:
-            os.mkdir('wyniki')
+            os.mkdir('results')
         except:
             pass
-        #sub.run("wsl for i in *.png; do mv $i wyniki/; done")
+        #sub.run("for i in *.png; do mv $i wyniki/; done")
 
         if self.frames:
-            sub.run("wsl ffmpeg -framerate 20 -i frames/f_%05d.png -c:v libx264 anim.mp4 -y", shell=True)
+            sub.run("ffmpeg -framerate 20 -i frames/f_%05d.png -c:v libx264 anim.mp4 -y", shell=True)
 
-            #sub.run("wsl for i in *.mp4; do mv $i wyniki/; done")
+            #sub.run("for i in *.mp4; do mv $i wyniki/; done")
 
         exit()
 
     def periodic(self, print_message=False):
-        # periodyczne warunki brzegowe
+        # periodic boundary conditions
         for n in self.atoms:
 
             if n.X[0] > self.boxsize or n.X[0] < 0 or n.X[1] > self.boxsize or n.X[1] < 0:
@@ -159,36 +159,36 @@ class simulation(object):  # Klasa symulujaca cala symulacje
             else:
                 pass
                 if print_message:
-                    print("dla", n, "X[0] > 8.0", "X[0] change to", n.X[0])
+                    print("for", n, "X[0] > 8.0", "X[0] change to", n.X[0])
 
             # if n.X[1] > self.boxsize:
             #    n.X[1] = n.X[1] % self.boxsize
             #    if print_message:
-            #        print("dla", n, "X[1] > 8.0")
+            #        print("for", n, "X[1] > 8.0")
 
     def give_pos(self, print_message=False):
         self.count_r_vectors_matrix(False)
-        print("przed losowaniem", self.r_len_matrix)
+        print("before randomization", self.r_len_matrix)
         for i, n in enumerate(self.atoms):
             for j, m in enumerate(self.atoms):
                 if i != j:
                     #if self.r_len_matrix[i][j] <= 1:
-                    #    print("poczatkowe", self.r_len_matrix[i][j])
+                    #    print("initial", self.r_len_matrix[i][j])
                     while self.r_len_matrix[i][j] <= 1:
-                        #print("losujemy")
+                        #print("randomizing")
                         n.X = np.random.uniform(low=0.1, high=self.boxsize - 0.1, size=2)
                         self.count_r_vectors_matrix(False)
         self.count_r_vectors_matrix(False)
-        print("po losowaniu", self.r_len_matrix)
+        print("after randomization", self.r_len_matrix)
 
     def update_pos_matrix(self):
-        # Lista polozen (zagniezdzona)
+        # List of positions (nested)
         self.pos_matrix.clear()
         for n in self.atoms:
             self.pos_matrix.append(n.X)
         # print(self.pos_matrix)
 
-    def liczodnajblizszego(self, i, j, n, m):
+    def find_closest(self, i, j, n, m):
         if self.r_vectors_matrix[i][j][0] > self.boxsize / 2:
             self.r_vectors_matrix[i][j] = n.X - np.array([m.X[0] - self.boxsize, m.X[1]])
         elif self.r_vectors_matrix[i][j][0] < -(self.boxsize / 2):
@@ -200,12 +200,12 @@ class simulation(object):  # Klasa symulujaca cala symulacje
         else:
             pass
 
-    def count_r_vectors_matrix(self, czyodnajblizszego):
+    def count_r_vectors_matrix(self, find_closest):
         for i, n in enumerate(self.atoms):
             for j, m in enumerate(self.atoms):
                 self.r_vectors_matrix[i][j] = n.X - m.X
-                if czyodnajblizszego:
-                    self.liczodnajblizszego(i, j, n, m)
+                if find_closest:
+                    self.find_closest(i, j, n, m)
                 self.r_len_matrix[i][j] = math.sqrt(
                     self.r_vectors_matrix[i][j][0] ** 2 + self.r_vectors_matrix[i][j][1] ** 2)
 
@@ -261,26 +261,26 @@ class simulation(object):  # Klasa symulujaca cala symulacje
         axs[0, 0].set_ylim([0, self.boxsize])
         for n in self.atoms:
             axs[0, 0].scatter(n.xlist, n.ylist)
-        axs[0, 0].set_title('Trajektoria')
+        axs[0, 0].set_title('Trajectory')
         axs[0, 0].set_xlabel('x')
         axs[0, 0].set_ylabel('y')
 
         axs[0, 1].plot(self.tlist, self.eklist)
-        axs[0, 1].set_title('Energia kinetyczna')
+        axs[0, 1].set_title('Kinetic Energy')
         axs[0, 1].set_xlabel('t')
         axs[0, 1].set_ylabel('Ek')
 
         axs[1, 0].plot(self.tlist, self.eplist)
-        axs[1, 0].set_title('Energia potencjalna')
+        axs[1, 0].set_title('Potential Energy')
         axs[1, 0].set_xlabel('t')
         axs[1, 0].set_ylabel('Ep')
 
         axs[1, 1].plot(self.tlist, self.eclist)
-        axs[1, 1].set_title('Energia całkowita')
+        axs[1, 1].set_title('Total Energy')
         axs[1, 1].set_xlabel('t')
         axs[1, 1].set_ylabel('Ec')
         if savefig:
-            fig.savefig("_temp_" + "bez_termo" + "_subplots.png")
+            fig.savefig("_temp_" + "no_thermo" + "_subplots.png")
         # fig.savefig("_temp_" + str(temp) + "_subplots.png")
 
         plt.show()
@@ -300,7 +300,7 @@ class simulation(object):  # Klasa symulujaca cala symulacje
             # plt.plot(self.x[:self.step, i], self.y[:self.step, i], linewidth=1)
 
         plt.savefig(name, bbox_inches='tight', pad_inches=0., dpi=300)
-        # zamykamy na koniec, by nie zawalać pamięci
+        # closing to save memory
         plt.close()
 
     def initialise_temperature(self, T0):
@@ -317,7 +317,7 @@ class simulation(object):  # Klasa symulujaca cala symulacje
             scaling_factor = math.sqrt(T0 / ek_mean)
             n.V = n.V * scaling_factor
 
-    def termostat(self, T_term, num_of_dimensions=2, k=1):
+    def thermostat(self, T_term, num_of_dimensions=2, k=1):
         c = 0
         for n in self.atoms:
             vlen = math.sqrt((n.V[0] ** 2 + n.V[1] ** 2))
@@ -329,14 +329,14 @@ class simulation(object):  # Klasa symulujaca cala symulacje
         # print(self.eta)
         return T
 
-    def leap_frog(self, termostat, print_message=False):
+    def leap_frog(self, thermostat, print_message=False):
         for n in self.atoms:
             if n.V_minus_half is None:
                 n.V_minus_half = n.V0 - n.F / (2 * n.m) * self.dt
-            if termostat:
-                self.termostat(self.temp_term)
+            if thermostat:
+                self.thermostat(self.temp_term)
                 n.V_plus_half = ((2 * self.eta) - 1) * n.V_minus_half + (self.eta * n.F / n.m) * self.dt
-            if not termostat:
+            if not thermostat:
                 n.V_plus_half = n.V_minus_half + n.F / n.m * self.dt
 
             n.X = n.X + n.V_plus_half * self.dt
@@ -346,7 +346,7 @@ class simulation(object):  # Klasa symulujaca cala symulacje
             if print_message:
                 print(n.name, "X", n.X)
 
-    def animacja(self, i):
+    def animation(self, i):
         if self.frames and i % self.steps_per_frame == 0:
             self.save_frame('frames/f_{:05d}.png'.format(self.frame))
             self.frame += 1
@@ -355,7 +355,7 @@ class simulation(object):  # Klasa symulujaca cala symulacje
             n.xlist.append(n.X[0])
             n.ylist.append(n.X[1])
 
-    def dane_do_wykresow(self, i):
+    def data_for_plots(self, i):
         self.eksum = 0
         self.epsum = 0
         for c, n in enumerate(self.atoms):
@@ -382,17 +382,17 @@ class simulation(object):  # Klasa symulujaca cala symulacje
     def steps(self):
 
         for i in trange(self.no_of_steps):
-            self.leap_frog(self.czytermostat)
+            self.leap_frog(self.thermostat)
             self.periodic()
             self.count_forces()
             self.count_energy()
-            self.dane_do_wykresow(i)
-            self.animacja(i)
+            self.data_for_plots(i)
+            self.animation(i)
             self.debug_plots1(i)
 
     def main(self):
         try:
-            sub.run("wsl rm -r frames")
+            sub.run("rm -r frames")
         except:
             pass
         self.give_names()
