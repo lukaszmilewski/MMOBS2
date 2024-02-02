@@ -4,32 +4,30 @@ import math
 import os
 from tqdm import trange, tqdm
 
+# -------- Classes ----------
 
-# -------- klasy ----------
-
-class atom:  # Klasa określająca wszystkie elementy/atomy w układzie: w tym przypadku jest to i planeta i słońce
-    def __init__(self, x0, v0, m, f, ):  # trajectory = np.empty(0, dtype=float)):
-        # położenie
+class Atom:  
+    def __init__(self, x0, v0, m, f):
+        # position
         self.X0 = x0
         self.X = x0
         self.X_plus1 = None
         self.X_minus1 = None
-        # prędkość
+        # velocity
         self.V0 = v0
         self.V = v0
         self.V_plus_half = None
         self.V_minus_half = None
-        # masa`
+        # mass
         self.m = m
-        # Siła działająca na dany element ukladu przez
-        # inny element ukladu - np sila grawitacji miedzy planeta a sloncem
+        # Force acting on the atom
         self.F = f
         self.f_next = None
         self.f_prev = None
-        # self.trajectory = trajectory
+        # Lists for trajectory
         self.xlist = []
         self.ylist = []
-
+        # Lists for energy
         self.eklist = []
         self.eplist = []
         self.eclist = []
@@ -40,10 +38,8 @@ class atom:  # Klasa określająca wszystkie elementy/atomy w układzie: w tym p
 
         self.g = 0.01
 
-    def count_force(self, atom2):  # Definicja sily grawitacji, działającej na dany atom(self)
-        # wywierana prz ez podany Atom2
-
-        r = atom2.X - self.X  # wektor odleglosci
+    def count_force(self, atom2):  
+        r = atom2.X - self.X  
         r_len = math.sqrt(r[0] ** 2 + r[1] ** 2)
         r3 = r_len ** 3
         self.F = (self.g * atom2.m * self.m / r3) * r
@@ -61,7 +57,7 @@ class atom:  # Klasa określająca wszystkie elementy/atomy w układzie: w tym p
     def give_velocity_value(self):
         return self.V
 
-    def give_polozenie(self):
+    def give_position(self):
         return self.X
 
     def give_trajectory(self):
@@ -79,22 +75,22 @@ def subplots(atom1, atom2, method):
 
     axs[0, 0].plot(atom1.xlist, atom1.ylist)
     axs[0, 0].scatter(atom2.X0[0], atom2.X0[1])
-    axs[0, 0].set_title('Trajektoria')
+    axs[0, 0].set_title('Trajectory')
     axs[0, 0].set_xlabel('x')
     axs[0, 0].set_ylabel('y')
 
     axs[0, 1].plot(atom1.tlist, atom1.eklist)
-    axs[0, 1].set_title('Energia kinetyczna')
+    axs[0, 1].set_title('Kinetic Energy')
     axs[0, 1].set_xlabel('t')
     axs[0, 1].set_ylabel('Ek')
 
     axs[1, 0].plot(atom1.tlist, atom1.eplist)
-    axs[1, 0].set_title('Energia potencjalna')
+    axs[1, 0].set_title('Potential Energy')
     axs[1, 0].set_xlabel('t')
     axs[1, 0].set_ylabel('Ep')
 
     axs[1, 1].plot(atom1.tlist, atom1.eclist)
-    axs[1, 1].set_title('Energia całkowita')
+    axs[1, 1].set_title('Total Energy')
     axs[1, 1].set_xlabel('t')
     axs[1, 1].set_ylabel('Ec')
 
@@ -103,19 +99,15 @@ def subplots(atom1, atom2, method):
     plt.close()
 
 
-class simulation:  # Klasa symulujaca cala symulacje
-
-    def __init__(self, atoms, dt, no_of_steps, method, steps_per_frame=10,
-                 export_frames=True, export_subplots=True):
-        self.atoms = atoms  # lista atomów biorących udzial w symulacji
-        self.dt = dt  # krok czasowy
+class Simulation:  
+    def __init__(self, atoms, dt, no_of_steps, method, steps_per_frame=10, export_frames=True, export_subplots=True):
+        self.atoms = atoms  
+        self.dt = dt  
         self.max_step = no_of_steps
         self.method = method
         self.subplots = export_subplots
-        # ----- do animacji -----
         self.step = 0
         self.steps_per_frame = steps_per_frame
-        # export parameters
         self.frames = export_frames
 
         self.x = np.zeros([self.max_step + 1, len(self.atoms)], dtype=np.int16)
@@ -129,10 +121,8 @@ class simulation:  # Klasa symulujaca cala symulacje
         atom1.V = atom1.V + atom1.F * self.dt / atom1.m
 
     def verlet(self, atom1):
-
         if atom1.X_plus1 is None:
             atom1.X_plus1 = atom1.X + atom1.V * self.dt + (1 / 2) * (atom1.F / atom1.m) * (self.dt ** 2)
-
         else:
             atom1.X_plus1 = 2 * atom1.X - atom1.X_minus1 + (atom1.F / atom1.m) * self.dt ** 2
             atom1.V = 1 / 2 * (atom1.X_plus1 - atom1.X_minus1) / self.dt
@@ -141,7 +131,6 @@ class simulation:  # Klasa symulujaca cala symulacje
         atom1.X = atom1.X_plus1
 
     def leap_frog(self, atom1):
-
         if atom1.V_minus_half is None:
             atom1.V_minus_half = atom1.V0 - atom1.F / (2 * atom1.m) * self.dt
         atom1.V_plus_half = atom1.V_minus_half + atom1.F / atom1.m * self.dt
@@ -177,7 +166,6 @@ class simulation:  # Klasa symulujaca cala symulacje
         atom1.eclist.append(atom1.ek + atom1.ep)
 
         if not atom1.tlist:
-
             atom1.tlist.append(self.dt)
         else:
             atom1.tlist.append(self.dt + atom1.tlist[-1])
@@ -185,17 +173,14 @@ class simulation:  # Klasa symulujaca cala symulacje
     def initiate_frame_print(self):
         self.frame = 0
 
-        # tworzy folder na klatki symulacyjne
         try:
             os.mkdir(self.method + '_frames')
         except:
             pass
 
     def save_frame(self, name):
-        plt.tick_params(axis='both', which='both', direction='in',
-                        right=True, top=True)
+        plt.tick_params(axis='both', which='both', direction='in', right=True, top=True)
         plt.gca().set_aspect('equal', adjustable='box')
-
         plt.xlim(-1.2, 1.2)
         plt.ylim(-1.2, 1.2)
         for atom, i in zip(self.atoms, range(len(self.atoms))):
@@ -203,7 +188,6 @@ class simulation:  # Klasa symulujaca cala symulacje
             plt.plot(self.x[:self.step, i], self.y[:self.step, i], linewidth=1)
 
         plt.savefig(name, bbox_inches='tight', pad_inches=0., dpi=300)
-        # zamykamy na koniec, by nie zawalać pamięci
         plt.close()
 
     def main(self):
@@ -219,27 +203,21 @@ class simulation:  # Klasa symulujaca cala symulacje
         if self.subplots:
             subplots(self.atoms[0], self.atoms[1], self.method)
 
+# -------- Simulation Parameters ----------
 
-# -------- parametry symulacji ----------
-
-#       [m,   M, no_of_steps, dt, planetX0, planetV0, sunX0, sunV0]
 param = [0.1, 500, 8000, 0.001, np.array([0, 1]), np.array([2, 0]), np.array([0, 0]), np.array([0, 0])]
 
-# -------- obiekty ----------
+# -------- Objects ----------
 
-planet_euler = atom(param[4], param[5], param[0], 0)
+planet_euler = Atom(param[4], param[5], param[0], 0)
+planet_verlet = Atom(param[4], param[5], param[0], 0)
+planet_leapfrog = Atom(param[4], param[5], param[0], 0)
+sun = Atom(param[6], param[7], param[1], 0)
 
-planet_verlet = atom(param[4], param[5], param[0], 0)
+# -------- Simulation --------
 
-planet_leapfrog = atom(param[4], param[5], param[0], 0)
+simul_euler = Simulation([planet_euler, sun], param[3], param[2], 'e')
+simul_verlet = Simulation([planet_verlet, sun], param[3], param[2], 'v')
+simul_leapfrog = Simulation([planet_leapfrog, sun], param[3], param[2], 'lf')
 
-sun = atom(param[6], param[7], param[1], 0)
-
-# -------- symulacja --------
-
-simul_euler = simulation([planet_euler, sun], param[3], param[2], 'e')
-simul_verlet = simulation([planet_verlet, sun], param[3], param[2], 'v')
-
-simul_leapfrog = simulation([planet_leapfrog, sun], param[3], param[2], 'lf')
-
-print("Koniec")
+print("End")
