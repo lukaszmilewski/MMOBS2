@@ -1,6 +1,7 @@
 # Molecular Modeling Projects
 
-This repository contains three Python object-oriented projects developed as part of the Molecular Modeling course at the University of Warsaw.\\
+This repository contains three Python object-oriented projects developed as part of the Molecular Modeling course at the University of Warsaw.
+
 ![ising](ising_model/results_plots.png)
 ## 1. Ising Model Simulation
 
