@@ -3,7 +3,7 @@ import random
 from tqdm import trange
 import matplotlib.pyplot as plt
 
-# **********Parametry symulacji**********
+# **********Simulation Parameters**********
 no_of_steps = 3000
 N = 3
 B = 0
@@ -11,8 +11,8 @@ J = 1
 betas = np.linspace(0.2, 2, 10)
 
 
-# **********inicjalizacja*************
-def inicjacja_siatki():
+# **********Initialization*************
+def initialize_grid():
     s = np.empty(N * N, dtype=np.int).reshape(N, N)
     for i in range(N):
         for j in range(N):
@@ -20,15 +20,15 @@ def inicjacja_siatki():
     return s
 
 
-def inicjacja_szachownicy(s):
+def initialize_checkerboard(s):
     blacks = ((s // N + s % N) % 2).astype(bool)
     whites = np.logical_not(blacks)
     return blacks, whites
 
 
-# ***************** GŁOWNY PROGRAM *************************
+# ***************** MAIN PROGRAM *************************
 
-def liczmagnetyzacje(s):
+def calculate_magnetization(s):
     m = np.roll(s, 1, axis=0)
     m += np.roll(s, -1, axis=0)
     m += np.roll(s, 1, axis=1)
@@ -37,68 +37,68 @@ def liczmagnetyzacje(s):
 
 
 def ising(s, beta):
-    M_lista = []
-    blacks, whites = inicjacja_szachownicy(s)
+    M_list = []
+    blacks, whites = initialize_checkerboard(s)
     for t in range(no_of_steps):
-        m = liczmagnetyzacje(s)
-        # energia
+        m = calculate_magnetization(s)
+        # energy
         E_plus = -m
-        # prawdopodobienstwo
+        # probability
         p_plus = 1 / (1 + np.exp(2 * beta * E_plus))
         r = np.random.rand(N, N)
         up = r < p_plus
-        # wybor ktore aktualizuje
-        wybor = random.choice([blacks, whites])
-        s[wybor] = -1
-        s[wybor & up] = +1
+        # choosing which to update
+        choice = random.choice([blacks, whites])
+        s[choice] = -1
+        s[choice & up] = +1
 
         if t >= 1500 and t % 2 == 0:
             M = (np.abs(np.mean(s)))
-            M_lista.append(M)
+            M_list.append(M)
 
-    M_srednie = np.mean(M_lista)
-    chi = np.var(M_lista) * beta
-    return M_srednie, chi
+    avg_M = np.mean(M_list)
+    chi = np.var(M_list) * beta
+    return avg_M, chi
 
 
 def plots(M, chi, m_error, chi_error):
     fig, axs = plt.subplots(2, 1, figsize=(10, 10))
 
-    axs[0].set_title('Wykres bezwzględnej wartości magnetycznej od wartości temperatury odwrotnej')
+    axs[0].set_title('Plot of absolute magnetization against inverse temperature')
     axs[0].set_xlabel('beta')
-    axs[0].set_ylabel('magnetyzacja M')
+    axs[0].set_ylabel('Magnetization M')
     axs[0].errorbar(betas, M, m_error)
-    axs[1].set_title('Wykres podatności magnetycznej od wartości temperatury odwrotnej')
+    axs[1].set_title('Plot of magnetic susceptibility against inverse temperature')
     axs[1].set_xlabel('beta')
-    axs[1].set_ylabel('Podatność magnetyczna chi')
+    axs[1].set_ylabel('Magnetic susceptibility chi')
     axs[1].errorbar(betas, chi, chi_error)
 
-    fig.savefig('3_Ising_lm_wykresy')
+    fig.savefig('3_Ising_lm_plots')
     plt.show()
     plt.close()
 
 
 def main():
-    s = inicjacja_siatki()
-    M_koncowe = []
-    chi_koncowe = []
-    M_koncowe_error = []
-    chi_koncowe_error = []
+    s = initialize_grid()
+    final_M = []
+    final_chi = []
+    final_M_error = []
+    final_chi_error = []
 
     for beta in betas:
-        M_srednie_lista = []
-        lista_chi = []
+        avg_M_list = []
+        chi_list = []
         for k in range(10):
-            M_srednie, chi = ising(s, beta)
-            M_srednie_lista.append(M_srednie)
-            lista_chi.append(chi)
+            avg_M, chi = ising(s, beta)
+            avg_M_list.append(avg_M)
+            chi_list.append(chi)
 
-        M_koncowe.append(np.mean(M_srednie_lista))
-        chi_koncowe.append(np.mean(lista_chi))
-        M_koncowe_error.append(np.std(M_srednie_lista))
-        chi_koncowe_error.append(np.std(lista_chi))
+        final_M.append(np.mean(avg_M_list))
+        final_chi.append(np.mean(chi_list))
+        final_M_error.append(np.std(avg_M_list))
+        final_chi_error.append(np.std(chi_list))
 
-    plots(M_koncowe, chi_koncowe, M_koncowe_error, chi_koncowe_error)
+    plots(final_M, final_chi, final_M_error, final_chi_error)
 
 
 if __name__ == '__main__':
