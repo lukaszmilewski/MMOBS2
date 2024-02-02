@@ -1,7 +1,7 @@
 # Molecular Modeling Projects
 
 This repository contains three Python object-oriented projects developed as part of the Molecular Modeling course at the University of Warsaw.
-
+!(ising_model/results_plots.png)
 ## 1. Ising Model Simulation
 
 The Ising model simulation project aims to model the behavior of a 2D Ising model using Monte Carlo methods. The code implements the Metropolis algorithm to simulate the evolution of spins on a lattice. The resulting figure visualizes the magnetization of the system as a function of temperature.
