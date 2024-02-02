@@ -26,6 +26,9 @@ The Molecular Dynamics of Random Walk project simulates the behavior of particle
 - Trajectory plotting and animation.
 - Exporting simulation frames to create an animation.
 
+![anim](animacja.gif)
+
+
 
 Each project is implemented in Python, following an object-oriented programming paradigm, making it easy to understand, modify, and extend.
 
@@ -44,3 +47,7 @@ Each project directory contains the Python script for running the simulation and
 python ising_model_simulation.py
 python planet_sun_simulation.py
 python molecular_dynamics_random_walk.py
+
+## License
+
+This project is licensed under the [GNU General Public License](LICENSE) - see the [LICENSE](LICENSE) file for details.
