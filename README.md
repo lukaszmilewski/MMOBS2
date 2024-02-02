@@ -47,7 +47,7 @@ Each project directory contains the Python script for running the simulation and
 python ising_model_simulation.py
 python planet_sun_simulation.py
 python molecular_dynamics_random_walk.py
-
+```
 ## License
 
 This project is licensed under the [GNU General Public License](LICENSE) - see the [LICENSE](LICENSE) file for details.
